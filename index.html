@@ -283,7 +283,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       border: 1px solid #ff6666;
     }
-	
+
     @media (max-width: 768px) {
       .newspaper-wrapper { padding: 0; }
       .newspaper-name svg { height: var(--logo-height-sm); }
@@ -365,12 +365,12 @@
 
       <div class="main-story">
 	    <div class="story-content image-right">
-		  <div class="story-text">
+          <div class="story-text">
             <div class="extra-banner">EXTRA</div>
             <h2 class="main-headline" id="main-headline">RASMUS 30 ÅR!</h2>
-		  </div>
+          </div>
 		  <div class="story-image">
-		    <img src="rasmusTrashCan.jpg" alt="Rasmus sitter inne">
+			  <img src="rasmusTrashCan.jpg" alt="Rasmus sitter inne">
 		  </div>
 		</div>
       </div>
@@ -450,7 +450,7 @@
       <span class="counter-digit">0</span>
     </div>
   </div>
-  
+
   <!-- ===== Till toppen-knapp ===== -->
   <button id="toTopBtn" aria-label="Till toppen" title="Till toppen">↑</button>
 
@@ -504,19 +504,16 @@
         updateIcon();
       });
       updateIcon();
-	
-	    /* ====== Traffic Counter ====== */
+
+    /* ====== Traffic Counter ====== */
     (function () {
       const counterDisplay = document.getElementById('visitor-counter');
       if (!counterDisplay) return;
 
-      // Get or initialize visitor count from localStorage
-      const STORAGE_KEY = 'rasmus30_visitor_count';
-      let count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
-      
-      // Increment counter
-      count++;
-      localStorage.setItem(STORAGE_KEY, count.toString());
+      // Use a unique namespace for your counter
+      // IMPORTANT: Replace 'rasmus30birthday' with your own unique identifier
+      const COUNTER_NAMESPACE = 'rasmus30birthday';
+      const API_URL = `https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/visits`;
 
       // Format number with leading zeros (5 digits)
       const formatCount = (num) => {
@@ -535,32 +532,45 @@
       };
 
       // Animate counter from 0 to current count
-      let currentCount = 0;
-      const targetCount = count;
-      const duration = 1500; // 1.5 seconds
-      const startTime = Date.now();
+      const animateCounter = (targetCount) => {
+        let currentCount = 0;
+        const duration = 1500; // 1.5 seconds
+        const startTime = Date.now();
 
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        currentCount = Math.floor(easeOut * targetCount);
-        
-        updateDisplay(currentCount);
-        
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          updateDisplay(targetCount);
-        }
+        const animate = () => {
+          const elapsed = Date.now() - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing function for smooth animation
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          currentCount = Math.floor(easeOut * targetCount);
+          
+          updateDisplay(currentCount);
+          
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            updateDisplay(targetCount);
+          }
+        };
+
+        animate();
       };
 
-      // Start animation after a short delay
-      setTimeout(() => animate(), 300);
+      // Fetch and increment the counter
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+          const count = data.value || 0;
+          setTimeout(() => animateCounter(count), 300);
+        })
+        .catch(error => {
+          console.error('Counter error:', error);
+          // Fallback to showing zeros if API fails
+          updateDisplay(0);
+        });
     })();
-	})();
+    })();
   </script>
 
   <script>
