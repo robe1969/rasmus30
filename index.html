@@ -505,12 +505,16 @@
       });
       updateIcon();
 
-    })();
-
     /* ====== Traffic Counter ====== */
     (function () {
       const counterDisplay = document.getElementById('visitor-counter');
       if (!counterDisplay) return;
+
+      // Use a unique namespace for your counter
+      // IMPORTANT: Replace 'rasmus30birthday' with your own unique identifier
+      const COUNTER_NAMESPACE = 'rasmus30birthday';
+      //const API_URL = `https://api.countapi.xyz/hit/${COUNTER_NAMESPACE}/visits`;
+	  const API_URL = 'https://script.google.com/macros/s/AKfycbyZb_TE1TMTfElqwBnpsrwWs0bwEBc8TKzqZfeRsJ4azeDt4n6zU7qdZhLXdp7x63l_/exec';
 
       // Format number with leading zeros (5 digits)
       const formatCount = (num) => {
@@ -531,12 +535,14 @@
       // Animate counter from 0 to current count
       const animateCounter = (targetCount) => {
         let currentCount = 0;
-        const duration = 1500;
+        const duration = 1500; // 1.5 seconds
         const startTime = Date.now();
 
         const animate = () => {
           const elapsed = Date.now() - startTime;
           const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing function for smooth animation
           const easeOut = 1 - Math.pow(1 - progress, 3);
           currentCount = Math.floor(easeOut * targetCount);
           
@@ -548,30 +554,23 @@
             updateDisplay(targetCount);
           }
         };
+
         animate();
       };
 
-      // Try CountAPI - if it fails, use localStorage as fallback
-      const API_URL = 'https://api.countapi.xyz/hit/rasmus30birthday/visits';
-      
+      // Fetch and increment the counter
       fetch(API_URL)
-        .then(response => {
-          if (!response.ok) throw new Error('Network response was not ok');
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-          console.log('Counter response:', data);
-          const count = data.value || 1;
+          const count = data.value || 0;
           setTimeout(() => animateCounter(count), 300);
         })
         .catch(error => {
-          console.error('Counter API failed, using localStorage fallback:', error);
-          // Fallback to localStorage
-          let localCount = parseInt(localStorage.getItem('local-visitor-count') || '0', 10);
-          localCount++;
-          localStorage.setItem('local-visitor-count', localCount.toString());
-          setTimeout(() => animateCounter(localCount), 300);
+          console.error('Counter error:', error);
+          // Fallback to showing zeros if API fails
+          updateDisplay(0);
         });
+    })();
     })();
   </script>
 
